@@ -6,7 +6,7 @@ export default function LibrarianDashboard() {
   const token = localStorage.getItem('library_token');
 
   const fetchStats = async () => {
-    const res = await fetch('https://vgn-library-system.onrender.com/api/librarian/stats', {
+    const res = await fetch('https://vgn-library-system-1.onrender.com/api/librarian/stats', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.ok) setData(await res.json());
@@ -22,7 +22,7 @@ export default function LibrarianDashboard() {
 
   const submitBulk = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('https://vgn-library-system.onrender.com/api/books/bulk', {
+    const res = await fetch('https://vgn-library-system-1.onrender.com/api/books/bulk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ books: bulkBooks })
@@ -35,7 +35,7 @@ export default function LibrarianDashboard() {
   };
 
   const handleReturn = async (loanId: number) => {
-    const res = await fetch('https://vgn-library-system.onrender.com/api/librarian/return', {
+    const res = await fetch('https://vgn-library-system-1.onrender.com/api/librarian/return', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ loan_id: loanId })
