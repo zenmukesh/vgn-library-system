@@ -9,8 +9,8 @@ export default function UserDashboard() {
   const fetchData = async () => {
     const headers = { 'Authorization': `Bearer ${token}` };
     const [resBooks, resDash] = await Promise.all([
-      fetch('http://localhost:5000/api/books', { headers }),
-      fetch('http://localhost:5000/api/users/dashboard', { headers })
+      fetch('https://vgn-library-system.onrender.com/api/books', { headers }),
+      fetch('https://vgn-library-system.onrender.com/api/users/dashboard', { headers })
     ]);
     if (resBooks.ok && resDash.ok) {
       setBooks(await resBooks.json());
@@ -21,7 +21,7 @@ export default function UserDashboard() {
   useEffect(() => { fetchData(); }, []);
 
   const handleBorrow = async (bookId: number) => {
-    const res = await fetch('http://localhost:5000/api/books/borrow', {
+    const res = await fetch('https://vgn-library-system.onrender.com/api/books/borrow', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ book_id: bookId })
