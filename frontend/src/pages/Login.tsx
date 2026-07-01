@@ -12,7 +12,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch('https://vgn-library-system.onrender.com/api/auth/login', {
+      const res = await fetch('https://vgn-library-system-1.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
