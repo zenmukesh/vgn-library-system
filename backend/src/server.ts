@@ -139,9 +139,14 @@ app.get('/api/librarian/stats', authenticateToken, requireRole('librarian'), asy
   const { rows: bookSum } = await pool.query("SELECT SUM(total_copies) as total FROM books");
   const { rows: activeLoansCount } = await pool.query("SELECT COUNT(*) as count FROM loans WHERE status != 'returned'");
   const { rows: queueCount } = await pool.query("SELECT COUNT(*) as count FROM reservations WHERE status = 'pending'");
+  
+  // 🚨 THIS IS THE LINE THAT WAS MISSING THE GRADE AND SECTION:
   const { rows: allLoans } = await pool.query(`
-    SELECT loans.*, users.name as user_name, books.title as book_title FROM loans
-    JOIN users ON loans.user_id = users.id JOIN books ON loans.book_id = books.id ORDER BY loans.id DESC
+    SELECT loans.*, users.name as user_name, users.grade, users.section, books.title as book_title 
+    FROM loans
+    JOIN users ON loans.user_id = users.id 
+    JOIN books ON loans.book_id = books.id 
+    ORDER BY loans.id DESC
   `);
 
   res.json({
