@@ -150,7 +150,14 @@ app.post('/api/books/bulk', authenticateToken, requireRole('librarian'), async (
 });
 
 app.post('/api/librarian/return', authenticateToken, requireRole('librarian'), async (req, res) => {
-  const { loan_id } = req.body;
+  // Accept multiple parameter names in case the frontend uses a different key
+  const loan_id = req.body.loan_id || req.body.id || req.body.transactionId || req.body.loanId;
+  
+  if (!loan_id) {
+    console.log("❌ Error: No loan ID provided. Body received:", req.body);
+    return res.status(400).json({ error: 'Missing loan ID in request body.' });
+  }
+
   const client = await pool.connect();
 
   try {
@@ -160,9 +167,13 @@ app.post('/api/librarian/return', authenticateToken, requireRole('librarian'), a
     const loan = loanRows[0];
     if (!loan) throw new Error('Loan not found');
 
+    // 1. Mark as returned
     await client.query("UPDATE loans SET status = 'returned', return_date = CURRENT_DATE WHERE id = $1", [loan_id]);
+    
+    // 2. Add copy back to library
     await client.query("UPDATE books SET available_copies = available_copies + 1 WHERE id = $1", [loan.book_id]);
 
+    // 3. Process the reservation queue
     const { rows: queueRows } = await client.query("SELECT * FROM reservations WHERE book_id = $1 AND status = 'pending' ORDER BY id ASC LIMIT 1", [loan.book_id]);
     const nextReservation = queueRows[0];
 
@@ -176,14 +187,14 @@ app.post('/api/librarian/return', authenticateToken, requireRole('librarian'), a
     }
 
     await client.query('COMMIT');
-    res.json({ message: 'Return logged and next waitlisted user assigned.' });
+    res.json({ message: 'Return logged successfully and inventory updated.' });
   } catch (err) {
     await client.query('ROLLBACK');
-    res.status(500).json({ error: 'Failed to process return.' });
+    console.error("❌ Return Transaction Error:", err);
+    res.status(500).json({ error: 'Failed to process return in database.' });
   } finally {
     client.release();
   }
 });
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`📡 Cloud Server running smoothly on port ${PORT}`));
