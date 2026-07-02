@@ -96,6 +96,26 @@ app.post('/api/books/borrow', authenticateToken, requireRole('user'), async (req
     client.release();
   }
 });
+app.post('/api/admin/academic-rollover', authenticateToken, requireRole('librarian'), async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Graduate the 12th Standard students
+    await client.query("UPDATE users SET role = 'alumni' WHERE grade = 12 AND role = 'user'");
+
+    // 2. Promote everyone else by 1 standard
+    await client.query("UPDATE users SET grade = grade + 1 WHERE grade < 12 AND role = 'user'");
+
+    await client.query('COMMIT');
+    res.json({ message: 'Academic rollover complete! Welcome to the new school year.' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: 'Rollover failed.' });
+  } finally {
+    client.release();
+  }
+});
 
 app.get('/api/users/dashboard', authenticateToken, requireRole('user'), async (req: AuthRequest, res) => {
   const user_id = req.user!.id;
