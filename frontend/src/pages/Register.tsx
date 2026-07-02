@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function Register() {
-  // 1. Added grade and section to the initial state
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user', secretKey: '', grade: '', section: '' });
   const [msg, setMsg] = useState('');
   const navigate = useNavigate();
@@ -29,10 +28,7 @@ export default function Register() {
       {msg && <div className="p-3 mb-4 text-xs bg-indigo-50 rounded text-indigo-700 font-medium">{msg}</div>}
       <form onSubmit={handleRegister} className="space-y-4">
         <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg">
-          {/* When switching to user, we clear the secretKey */}
           <button type="button" onClick={() => setForm({...form, role: 'user', secretKey: ''})} className={`py-2 text-xs font-bold rounded-md transition ${form.role === 'user' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>🧑‍🎓 Student / User</button>
-          
-          {/* When switching to librarian, we clear the grade and section */}
           <button type="button" onClick={() => setForm({...form, role: 'librarian', grade: '', section: ''})} className={`py-2 text-xs font-bold rounded-md transition ${form.role === 'librarian' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>🔑 Librarian</button>
         </div>
         
@@ -41,7 +37,6 @@ export default function Register() {
           <input className="w-full border p-3 rounded-lg outline-none" type="text" placeholder="Full Name" required onChange={e => setForm({...form, name: e.target.value})} />
         </div>
 
-        {/* 2. The Conditional Standard & Section Dropdowns for Students */}
         {form.role === 'user' && (
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -52,6 +47,14 @@ export default function Register() {
                 required
               >
                 <option value="">Select...</option>
+                <option value="1">1st Std</option>
+                <option value="2">2nd Std</option>
+                <option value="3">3rd Std</option>
+                <option value="4">4th Std</option>
+                <option value="5">5th Std</option>
+                <option value="6">6th Std</option>
+                <option value="7">7th Std</option>
+                <option value="8">8th Std</option>
                 <option value="9">9th Std</option>
                 <option value="10">10th Std</option>
                 <option value="11">11th Std</option>
@@ -85,7 +88,6 @@ export default function Register() {
           <input className="w-full border p-3 rounded-lg outline-none" type="password" placeholder="••••••••" required onChange={e => setForm({...form, password: e.target.value})} />
         </div>
 
-        {/* 3. The conditional Secret Passcode Box for Librarians */}
         {form.role === 'librarian' && (
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Librarian Passcode</label>
