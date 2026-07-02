@@ -17,8 +17,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'vgn-chinmaya-secret-key';
 initDB();
 
 app.post('/api/auth/register', async (req, res) => {
-  const { name, email, password, role } = req.body;
+  // We added secretKey to the incoming data request
+  const { name, email, password, role, secretKey } = req.body; 
+  
   try {
+    // 🔒 THE SECURITY LOCK: 
+    // If they want to be a librarian, they MUST have the exact passcode
+    if (role === 'librarian' && secretKey !== 'VGN-ADMIN') {
+      return res.status(403).json({ error: 'Invalid Librarian Passcode!' });
+    }
+
     const hashedPwd = await bcrypt.hash(password, 10);
     const result = await pool.query(
       "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id",
