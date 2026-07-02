@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 export default function LibrarianDashboard() {
   const [data, setData] = useState<any>({ stats: {}, allLoans: [] });
   const [bulkBooks, setBulkBooks] = useState([{ title: '', author: '', genre: '', isbn: '', total_copies: 1 }]);
+  const [searchTerm, setSearchTerm] = useState(''); // Added search state
   const token = localStorage.getItem('library_token');
 
   const fetchStats = async () => {
@@ -46,6 +47,12 @@ export default function LibrarianDashboard() {
     }
   };
 
+  // Filter logs based on the search term (checks student name or book title)
+  const filteredLoans = data.allLoans?.filter((loan: any) => 
+    loan.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    loan.book_title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-3 gap-4">
@@ -83,22 +90,52 @@ export default function LibrarianDashboard() {
       </div>
 
       <div className="bg-white p-6 rounded-xl border shadow-sm">
-        <h3 className="font-bold text-slate-800 text-lg mb-4">Book Circulation Tracking Logs</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold text-slate-800 text-lg">Book Circulation Tracking Logs</h3>
+          
+          {/* Added Search Bar Here */}
+          <input 
+            type="text" 
+            placeholder="Search by student or book..." 
+            className="border-2 border-slate-200 focus:border-indigo-400 p-2 rounded-lg text-sm outline-none w-72 transition"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="bg-slate-50 border-b font-bold text-slate-400 uppercase">
               <th className="p-3">Borrower</th>
+              
+              {/* Added Class & Section Header */}
+              <th className="p-3">Class & Section</th>
+              
               <th className="p-3">Book</th>
               <th className="p-3">Status</th>
               <th className="p-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {data.allLoans?.map((loan: any) => (
+            {/* Map over filteredLoans instead of data.allLoans */}
+            {filteredLoans?.map((loan: any) => (
               <tr key={loan.id} className="border-b">
                 <td className="p-3 font-medium text-slate-700">{loan.user_name}</td>
+                
+                {/* Added Class & Section Data Cell */}
+                <td className="p-3 text-slate-600 font-medium">
+                  {loan.grade && loan.section ? `${loan.grade}-${loan.section}` : 'N/A'}
+                </td>
+
                 <td className="p-3 text-slate-600">{loan.book_title}</td>
-                <td className="p-3 uppercase font-bold text-[10px] text-emerald-600">{loan.status}</td>
+                
+                {/* Made Status visually pop a bit more */}
+                <td className="p-3 uppercase font-bold text-[10px]">
+                  <span className={`px-2 py-1 rounded-full ${loan.status === 'returned' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                    {loan.status}
+                  </span>
+                </td>
+
                 <td className="p-3 text-right">
                   {loan.status === 'borrowed' && (
                     <button onClick={() => handleReturn(loan.id)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded text-[11px] transition">Return</button>
@@ -108,6 +145,13 @@ export default function LibrarianDashboard() {
             ))}
           </tbody>
         </table>
+        
+        {/* Quick fallback if a search finds nothing */}
+        {filteredLoans?.length === 0 && (
+          <div className="text-center p-6 text-slate-400 italic">
+            No matching logs found.
+          </div>
+        )}
       </div>
     </div>
   );
